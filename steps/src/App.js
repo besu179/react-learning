@@ -36,12 +36,14 @@ export default function App() {
             <button
               style={{ backgroundColor: "#7950f2", color: "#fff" }}
               onClick={handlePrevious}
+              disabled={step === 1}
             >
               Previous
             </button>
             <button
               style={{ backgroundColor: "#7950f2", color: "#fff" }}
               onClick={handleNext}
+              disabled={step === 3}
             >
               Next
             </button>

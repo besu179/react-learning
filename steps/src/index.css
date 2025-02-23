@@ -15,6 +15,7 @@ body {
   border-radius: 7px;
   padding: 25px 100px;
   margin: 100px auto;
+  transition: opacity 1s ease-in-out;
 }
 
 .numbers {
