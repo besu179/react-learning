@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import StarRating from "./StarRating";
 
 const average = (arr) =>
-  arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
+  arr.length === 0 ? 0 : arr.reduce((acc, cur) => acc + cur, 0) / arr.length;
 const KEY = "d31f2715";
 
 export default function App() {
-  const [query, setQuery] = useState("halo");
+  const [query, setQuery] = useState("");
   const [watched, setWatched] = useState([]);
   const [movies, setMovies] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -31,11 +31,13 @@ export default function App() {
 
   useEffect(
     function () {
+      const controller = new AbortController();
       async function fetchMovies() {
         try {
           setIsLoading(true);
           const response = await fetch(
-            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
+            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
+            { signal: controller.signal }
           );
           if (!response.ok) {
             throw new Error("Network response was not ok");
@@ -51,6 +53,7 @@ export default function App() {
         } catch (error) {
           setError(error.message);
           setIsLoading(false);
+          if (error.name === "AbortError") setError("");
         }
       }
       if (query.length < 3) {
@@ -58,7 +61,11 @@ export default function App() {
         setMovies([]);
         return;
       }
+      handleCloseMovie();
       fetchMovies();
+      return function () {
+        controller.abort();
+      };
     },
     [query]
   );
@@ -304,6 +311,22 @@ function SelectedMovie({ selectedId, onCloseMovie, onAddWatched, watched }) {
 
   useEffect(
     function () {
+      function callback(e) {
+        if (e.code === "Escape") {
+          onCloseMovie();
+          console.log("Escape clicked");
+        }
+      }
+      document.addEventListener("keydown", callback);
+      return function () {
+        document.addEventListener("keydown", callback);
+      };
+    },
+    [onCloseMovie]
+  );
+
+  useEffect(
+    function () {
       async function getMovieDetails() {
         setIsLoading(true);
         const response = await fetch(
@@ -316,6 +339,18 @@ function SelectedMovie({ selectedId, onCloseMovie, onAddWatched, watched }) {
       getMovieDetails();
     },
     [selectedId]
+  );
+
+  useEffect(
+    function () {
+      if (!title) return;
+      document.title = `Movie | ${title}`;
+
+      return function () {
+        document.title = "usePopcorn";
+      };
+    },
+    [title]
   );
 
   return (
