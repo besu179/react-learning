@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import StarRating from "./StarRating";
 import { useMovie } from "./useMovie";
 
@@ -19,9 +19,9 @@ export default function App() {
     setSelectedId((selectedId) => (selectedId === id ? null : id));
   }
 
-  function handleCloseMovie() {
+  const handleCloseMovie = useCallback(() => {
     setSelectedId(null);
-  }
+  }, []);
 
   function handleAddWatched(movie) {
     setWatched((watched) => [...watched, movie]);
